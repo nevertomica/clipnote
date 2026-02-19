@@ -41,6 +41,7 @@ ai-review 的底部狀態列塞了 7 個快捷鍵提示（共 67 字元），在
 
 - **註記匯出前綴標記**（`marks.go`）：在 `ExportMarks()` 中為使用者註記添加 `[Q]` 前綴，透過 `noteExportPrefix` 常數控制。匯出格式為 `> [Q] 使用者的追問`。此變更僅影響匯出格式，不影響本次浮窗功能的 UI 顯示。
 - **標記符號顏色區分**（[feat-mark-color-distinction.md](feat-mark-color-distinction.md)）：純標記顯示粉紅色 `●`，有筆記的標記顯示黃色 `●`，方便一眼辨識。
+- **prefix+a 重新開啟 annotation pane**（[feat-reopen-pane.md](feat-reopen-pane.md)）：按 `Ctrl+b a` 可在右側 pane 關閉後重新開啟 annotation TUI。
 
 [回到目錄](#目錄)
 
