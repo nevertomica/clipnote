@@ -13,10 +13,7 @@ if ! command -v tmux &>/dev/null; then
   exit 1
 fi
 
-# Skip if binary already exists
-if [[ -x "$BIN_PATH" ]]; then
-  exit 0
-fi
+VERSION_FILE="${BIN_DIR}/.clipnote-version"
 
 # Detect platform
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -38,6 +35,15 @@ if [[ -z "$TAG" ]]; then
   exit 1
 fi
 
+# Skip if already installed and up to date
+INSTALLED=""
+if [[ -f "$VERSION_FILE" ]]; then
+  INSTALLED="$(cat "$VERSION_FILE")"
+fi
+if [[ -x "$BIN_PATH" && "$INSTALLED" == "$TAG" ]]; then
+  exit 0
+fi
+
 ASSET="clipnote-${OS}-${ARCH}"
 URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET}"
 
@@ -45,4 +51,5 @@ echo "clipnote: downloading ${ASSET} (${TAG})..."
 mkdir -p "$BIN_DIR"
 curl -fsSL -o "$BIN_PATH" "$URL"
 chmod +x "$BIN_PATH"
-echo "clipnote: installed to ${BIN_PATH}"
+echo "$TAG" > "$VERSION_FILE"
+echo "clipnote: installed ${TAG} to ${BIN_PATH}"
