@@ -5,6 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
@@ -37,6 +38,15 @@ func runAnnotationTUI(paneID string) {
 }
 
 func runLauncher() {
+	// 允許透過環境變數直接指定 CLI，跳過偵測和選擇器
+	if envCLI := os.Getenv("CLIPNOTE_CLI"); envCLI != "" {
+		if err := launchSession(envCLI); err != nil {
+			fmt.Fprintf(os.Stderr, "Launch failed: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	clis := detectCLIs()
 	if len(clis) == 0 {
 		fmt.Fprintln(os.Stderr, "No installed AI CLI found (claude, gemini, codex, aider)")
@@ -46,11 +56,13 @@ func runLauncher() {
 	var cli string
 	if len(clis) == 1 {
 		cli = clis[0]
-	} else {
+	} else if isatty.IsTerminal(os.Stdin.Fd()) {
 		cli = runSelector(clis)
 		if cli == "" {
 			return
 		}
+	} else {
+		cli = clis[0]
 	}
 
 	if err := launchSession(cli); err != nil {

@@ -19,13 +19,12 @@ Launch the clipnote annotation session via tmux.
 3. Only after the user confirms, run the following command using the Bash tool:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/bin/clipnote"
+CLIPNOTE_CLI=claude "${CLAUDE_PLUGIN_ROOT}/bin/clipnote"
 ```
 
-This will:
-1. Auto-detect installed AI CLIs (claude, gemini, codex, aider)
-2. If multiple CLIs are found, show a selection menu
-3. Create a tmux session with the AI CLI on the left and the annotation panel on the right
+This will create a tmux session with Claude CLI on the left and the annotation panel on the right.
+
+Note: `CLIPNOTE_CLI=claude` bypasses the interactive CLI selector, which cannot run inside Claude Code's non-TTY environment.
 
 ## Keybindings (tell the user)
 
