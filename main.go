@@ -38,7 +38,7 @@ func runAnnotationTUI(paneID string) {
 }
 
 func runLauncher() {
-	// 允許透過環境變數直接指定 CLI，跳過偵測和選擇器
+	// use CLIPNOTE_CLI env var to skip detection and selector
 	if envCLI := os.Getenv("CLIPNOTE_CLI"); envCLI != "" {
 		if err := launchSession(envCLI); err != nil {
 			fmt.Fprintf(os.Stderr, "Launch failed: %v\n", err)

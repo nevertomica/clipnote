@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/mattn/go-isatty"
 )
 
 var knownCLIs = []string{"claude", "gemini", "codex", "aider"}
@@ -23,6 +25,31 @@ func detectCLIs() []string {
 }
 
 func launchSession(cli string) error {
+	if !isatty.IsTerminal(os.Stdin.Fd()) {
+		return launchInNewTerminal(cli)
+	}
+	return launchInCurrentTerminal(cli)
+}
+
+// launchInNewTerminal opens a new Terminal.app window when no TTY is available (e.g. plugin subprocess)
+func launchInNewTerminal(cli string) error {
+	self, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+
+	// launch clipnote in a new Terminal.app window via osascript (macOS only)
+	script := fmt.Sprintf("CLIPNOTE_CLI=%s %s", cli, self)
+	cmd := exec.Command("osascript", "-e",
+		fmt.Sprintf(`tell application "Terminal"
+activate
+do script "%s"
+end tell`, script))
+	return cmd.Run()
+}
+
+// launchInCurrentTerminal creates a tmux session directly in the current terminal
+func launchInCurrentTerminal(cli string) error {
 	sessionName := "clipnote"
 	self, err := os.Executable()
 	if err != nil {
