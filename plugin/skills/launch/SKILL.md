@@ -1,7 +1,9 @@
 ---
 name: launch
-description: Launch clipnote tmux annotation session. Use when
-  the user explicitly asks to start, open, or launch clipnote.
+description: Launch clipnote tmux annotation session. Use when the user
+  explicitly mentions clipnote, wants to annotate/mark/highlight AI output,
+  wants to review AI responses or take notes, wants a split-pane annotation
+  panel, or wants to export/summarize key points from AI output.
 ---
 
 # clipnote:launch
@@ -10,7 +12,11 @@ Launch the clipnote annotation session via tmux.
 
 ## Instructions
 
-Run the following command using the Bash tool:
+1. When you detect the user's intent matches this skill, first explain:
+   - clipnote will open a **new tmux session** with an AI CLI and an annotation panel side by side
+   - This will **leave the current Claude Code environment** — the user will switch to a separate tmux workspace
+2. Ask the user to confirm before proceeding (e.g. "Shall I launch clipnote now?")
+3. Only after the user confirms, run the following command using the Bash tool:
 
 ```bash
 "${CLAUDE_PLUGIN_ROOT}/bin/clipnote"
