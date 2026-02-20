@@ -45,7 +45,7 @@ func launchDetached(cli string) error {
 	}
 
 	if isInsideTmux() {
-		return launchInTmuxSplit(self, cli)
+		return launchInTmuxSplit(self)
 	}
 
 	// fallback: open a new Terminal.app window via osascript (macOS only)
@@ -58,19 +58,36 @@ end tell`, script))
 	return cmd.Run()
 }
 
-// launchInTmuxSplit opens clipnote in a split pane within the current tmux window.
+// currentPaneID returns the tmux pane ID of the caller (e.g. Claude Code's pane)
+func currentPaneID() string {
+	out, err := exec.Command("tmux", "display-message", "-p", "#{pane_id}").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// launchInTmuxSplit opens the annotation TUI in a split pane within the current tmux window.
+// The TUI watches the caller's pane (Claude Code) directly — no new tmux session is created.
 // Reuses an existing pane if one is still alive.
-func launchInTmuxSplit(self, cli string) error {
-	launchCmd := fmt.Sprintf("CLIPNOTE_CLI=%s %s", cli, self)
+func launchInTmuxSplit(self string) error {
+	// get the pane ID of the caller (Claude Code) so the TUI can watch it
+	callerPane := currentPaneID()
+	if callerPane == "" {
+		return fmt.Errorf("failed to detect current tmux pane")
+	}
+
+	// the split pane runs the annotation TUI directly, watching the caller's pane
+	watchCmd := fmt.Sprintf("%s --internal-watch %s", self, callerPane)
 
 	// try to reuse existing pane
-	if reused := tryReusePane(launchCmd); reused {
+	if reused := tryReusePane(watchCmd); reused {
 		return nil
 	}
 
-	// create new split pane (45% width)
+	// create new split pane (45% width), run annotation TUI directly
 	splitCmd := exec.Command("tmux", "split-window", "-h", "-l", "45%",
-		"-P", "-F", "#{pane_id}", launchCmd)
+		"-P", "-F", "#{pane_id}", watchCmd)
 	out, err := splitCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("tmux split-window failed: %w\n%s", err, out)
