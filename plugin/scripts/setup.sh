@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="nevertomica/clipnote"
+REPO="scheepyang/clipnote"
 BIN_DIR="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}/bin"
 BIN_PATH="${BIN_DIR}/clipnote"
 

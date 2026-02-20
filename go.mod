@@ -1,4 +1,4 @@
-module github.com/nevertomica/clipnote
+module github.com/scheepyang/clipnote
 
 go 1.24.4
 
