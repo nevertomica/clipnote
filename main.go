@@ -33,8 +33,17 @@ func main() {
 		return
 	}
 
+	// parse --session-id flag for conversation resume
+	var sessionID string
+	for i, arg := range os.Args[1:] {
+		if arg == "--session-id" && i+2 < len(os.Args) {
+			sessionID = os.Args[i+2]
+			break
+		}
+	}
+
 	// Role 1: launcher
-	runLauncher()
+	runLauncher(sessionID)
 }
 
 func runAnnotationTUI(paneID string) {
@@ -52,10 +61,10 @@ func runAnnotationTUI(paneID string) {
 	}
 }
 
-func runLauncher() {
+func runLauncher(sessionID string) {
 	// use CLIPNOTE_CLI env var to skip detection and selector
 	if envCLI := os.Getenv("CLIPNOTE_CLI"); envCLI != "" {
-		if err := launchSession(envCLI); err != nil {
+		if err := launchSession(envCLI, sessionID); err != nil {
 			fmt.Fprintf(os.Stderr, "Launch failed: %v\n", err)
 			os.Exit(1)
 		}
@@ -80,7 +89,7 @@ func runLauncher() {
 		cli = clis[0]
 	}
 
-	if err := launchSession(cli); err != nil {
+	if err := launchSession(cli, sessionID); err != nil {
 		fmt.Fprintf(os.Stderr, "Launch failed: %v\n", err)
 		os.Exit(1)
 	}
@@ -90,9 +99,10 @@ func printUsage() {
 	fmt.Println(`clipnote -- AI CLI output annotation tool (tmux session mode)
 
 Usage:
-  clipnote              Launch tmux session (auto-detect AI CLI)
-  clipnote ipc <cmd>    Send IPC command to running annotation TUI
-  clipnote --help       Show this help
+  clipnote                          Launch tmux session (auto-detect AI CLI)
+  clipnote --session-id <uuid>      Launch with claude --resume <uuid>
+  clipnote ipc <cmd>                Send IPC command to running annotation TUI
+  clipnote --help                   Show this help
 
 IPC commands:
   capture               Capture left pane content
